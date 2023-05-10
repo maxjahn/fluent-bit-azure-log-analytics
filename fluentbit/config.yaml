@@ -68,6 +68,9 @@ data:
         Nested_under  kubernetes_labels
         Add_prefix    kubernetes_labels_
 
+  mappings.lua: |
+
+
   parsers.conf: |
     [PARSER]
         Name        json
