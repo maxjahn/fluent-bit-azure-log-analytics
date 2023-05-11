@@ -38,6 +38,25 @@ data:
         Skip_Long_Lines   Off
         Refresh_Interval  10
 
+    [INPUT]
+        Name tail 
+        Path              /var/log/containers/logapp-type1*.log
+        Tag  kyc
+        Parser json
+
+
+    [INPUT]
+        Name tail 
+        Path              /var/log/containers/logapp-type2*.log
+        Tag  crq
+        Parser json
+
+     [INPUT]
+        Name tail 
+        Path              /var/log/containers/logapp-type3*.log
+        Tag  karte
+        Parser json
+
   filter-kubernetes.conf: |
     [FILTER]
         Name                kubernetes
@@ -68,8 +87,24 @@ data:
         Nested_under  kubernetes_labels
         Add_prefix    kubernetes_labels_
 
-  mappings.lua: |
+    [FILTER]
+        Name Lua
+        Match kyc
+        script mappings.lua
+        call map_fields_kyc
 
+
+    [FILTER]
+        Name Lua
+        Match crq
+        script mappings.lua
+        call map_fields_crq
+
+    [FILTER]
+        Name Lua
+        Match karte
+        script mappings.lua
+        call map_fields_karte
 
   parsers.conf: |
     [PARSER]
@@ -99,3 +134,40 @@ data:
         Time_Key time
         Time_Format %Y-%m-%dT%H:%M:%S.%L
         Time_Keep Off
+
+  mappings.lua: |
+     function map_fields_kyc (tag, timestamp, record)
+        new_record = {}
+        new_record["tag"] = tag
+        new_record["thread"] = record["thread_name"]
+        new_record["level"] = record["level"]
+        new_record["logger"] = record["logger_name"]
+        new_record["message"] = record["message"]
+        -- new_record["original"] = record
+        
+        return 1, timestamp, new_record 
+      end
+
+      function map_fields_crq (tag, timestamp, record)
+        new_record = {}
+        new_record["tag"] = tag
+        new_record["thread"] = record["Thread"]
+        new_record["level"] = record["Severity"]
+        new_record["logger"] = record["LoggerName"]
+        new_record["message"] = record["message"]
+        -- new_record["original"] = record
+        
+        return 1, timestamp, new_record 
+      end
+
+      function map_fields_karte (tag, timestamp, record)
+        new_record = {}
+        new_record["tag"] = tag
+        new_record["thread"] = record["threadName"]
+        new_record["level"] = record["level"]
+        new_record["logger"] = record["loggerName"]
+        new_record["message"] = record["message"]
+        -- new_record["original"] = record
+        
+        return 1, timestamp, new_record 
+      end

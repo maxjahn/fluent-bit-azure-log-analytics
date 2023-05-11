@@ -2,7 +2,7 @@ FROM debian:latest
 WORKDIR /tmp
 
 COPY ./logs.sh /tmp/logs.sh
-COPY ./log.json /tmp/type3.json
+COPY ./type3.json /tmp/log.json
 
 RUN chmod 755 /tmp/logs.sh
 
