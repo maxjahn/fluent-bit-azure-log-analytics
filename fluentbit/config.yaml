@@ -22,41 +22,29 @@ data:
   output.conf: |
     [OUTPUT]
         Name            azure
-        Match           kube.var.log.containers.logapp*.*
+        Match           *cust-*
         Customer_ID     ${WorkspaceId}
         Shared_Key      ${SharedKey}
         Log_Type        ${LogName}
 
   input-kubernetes.conf: |
     [INPUT]
-        Name              tail
-        Tag               kube.*
-        Path              /var/log/containers/*.log
-        Parser            cri
-        DB                /var/log/flb_kube.db
-        Mem_Buf_Limit     5MB
-        Skip_Long_Lines   Off
-        Refresh_Interval  10
+        Name              tail 
+        Path              /var/log/cust-type1.log
+        Tag               cust-kyc
+        Parser            json-logs
 
     [INPUT]
-        Name tail 
-        Path              /var/log/containers/logapp-type1*.log
-        Tag  kyc
-        Parser json
-
-
+        Name              tail 
+        Path              /var/log/cust-type2.log
+        Tag               cust-crq
+        Parser            json-logs
     [INPUT]
-        Name tail 
-        Path              /var/log/containers/logapp-type2*.log
-        Tag  crq
-        Parser json
-
-     [INPUT]
-        Name tail 
-        Path              /var/log/containers/logapp-type3*.log
-        Tag  karte
-        Parser json
-
+        Name              tail 
+        Path              /var/log/cust-type3.log
+        Tag               cust-karte
+        Parser            json-logs
+        
   filter-kubernetes.conf: |
     [FILTER]
         Name                kubernetes
@@ -88,21 +76,18 @@ data:
         Add_prefix    kubernetes_labels_
 
     [FILTER]
-        Name Lua
-        Match kyc
+        Name lua
+        Match cust-kyc
         script mappings.lua
         call map_fields_kyc
-
-
     [FILTER]
-        Name Lua
-        Match crq
+        Name lua
+        Match cust-crq
         script mappings.lua
         call map_fields_crq
-
     [FILTER]
-        Name Lua
-        Match karte
+        Name lua
+        Match cust-karte
         script mappings.lua
         call map_fields_karte
 
@@ -113,7 +98,11 @@ data:
         Time_Key    time
         Time_Format %d/%b/%Y:%H:%M:%S %z
         Time_Keep   Off
-
+    [PARSER]
+        Name        json-logs
+        Format      json
+        Time_Key    time
+        Time_Format %Y-%m-%dT%H:%M:%S %z
     [PARSER]
         Name        syslog
         Format      regex
@@ -138,36 +127,36 @@ data:
   mappings.lua: |
      function map_fields_kyc (tag, timestamp, record)
         new_record = {}
-        new_record["tag"] = tag
-        new_record["thread"] = record["thread_name"]
-        new_record["level"] = record["level"]
-        new_record["logger"] = record["logger_name"]
-        new_record["message"] = record["message"]
-        -- new_record["original"] = record
+        new_record["log_tag"] = tag
+        new_record["log_thread"] = record["thread_name"]
+        new_record["log_level"] = record["level"]
+        new_record["log_logger"] = record["logger_name"]
+        new_record["log_message"] = record["message"]
+        new_record["log_original"] = record
         
         return 1, timestamp, new_record 
       end
 
       function map_fields_crq (tag, timestamp, record)
         new_record = {}
-        new_record["tag"] = tag
-        new_record["thread"] = record["Thread"]
-        new_record["level"] = record["Severity"]
-        new_record["logger"] = record["LoggerName"]
-        new_record["message"] = record["message"]
-        -- new_record["original"] = record
+        new_record["log_tag"] = tag
+        new_record["log_thread"] = record["Thread"]
+        new_record["log_level"] = record["Severity"]
+        new_record["log_logger"] = record["LoggerName"]
+        new_record["log_message"] = record["message"]
+        new_record["log-original"] = record
         
         return 1, timestamp, new_record 
       end
 
       function map_fields_karte (tag, timestamp, record)
         new_record = {}
-        new_record["tag"] = tag
-        new_record["thread"] = record["threadName"]
-        new_record["level"] = record["level"]
-        new_record["logger"] = record["loggerName"]
-        new_record["message"] = record["message"]
-        -- new_record["original"] = record
+        new_record["log_tag"] = tag
+        new_record["log_thread"] = record["threadName"]
+        new_record["log_level"] = record["level"]
+        new_record["log_logger"] = record["loggerName"]
+        new_record["log_message"] = record["message"]
+        new_record["log_original"] = record
         
         return 1, timestamp, new_record 
       end

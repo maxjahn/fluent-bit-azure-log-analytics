@@ -6,5 +6,5 @@ COPY ./type3.json /tmp/log.json
 
 RUN chmod 755 /tmp/logs.sh
 
-CMD /bin/bash /tmp/logs.sh
+CMD /tmp/logs.sh /tmp/log.json /var/log/cust-type3.log
 
