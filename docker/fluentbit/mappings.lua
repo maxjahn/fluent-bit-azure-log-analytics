@@ -2,6 +2,7 @@
 function map_fields_kyc (tag, timestamp, record)
     new_record = {}
     new_record["log_tag"] = tag
+    new_record["log_timestamp"] = record['@timestamp']
     new_record["log_thread"] = record["thread_name"]
     new_record["log_level"] = record["level"]
     new_record["log_logger"] = record["logger_name"]
@@ -14,6 +15,8 @@ end
 function map_fields_crq (tag, timestamp, record)
     new_record = {}
     new_record["log_tag"] = tag
+    new_record["log_timestamp"] = os.date("%Y-%m-%dT%H:%M:%S", record["timestamp"])
+    --new_record["log_timestamp"] = record["Time"]
     new_record["log_thread"] = record["Thread"]
     new_record["log_level"] = record["Severity"]
     new_record["log_logger"] = record["LoggerName"]
@@ -26,6 +29,7 @@ end
 function map_fields_karte (tag, timestamp, record)
     new_record = {}
     new_record["log_tag"] = tag
+    new_record["log_timestamp"] = record["timestamp"]
     new_record["log_thread"] = record["threadName"]
     new_record["log_level"] = record["level"]
     new_record["log_logger"] = record["loggerName"]
